@@ -21,22 +21,6 @@ public class ConstraintViolationExceptionMapperTest {
 
     /**
      * Tests to make sure no errors are returned when <code>Set</code> of
-     * ConstraintViolation</code> is <code>null<code>
-     */
-    @Test
-    public void testNullViolations() {
-	final ConstraintViolationExceptionMapper mapper = new ConstraintViolationExceptionMapper();
-	final Response response = mapper.toResponse(new ConstraintViolationException(null));
-	assertThat(response, is(notNullValue()));
-	assertThat(response.getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
-
-	final ErrorMessages errors = (ErrorMessages) response.getEntity();
-	assertThat(errors, is(notNullValue()));
-	assertThat(errors.getErrors().isEmpty(), is(true));
-    }
-
-    /**
-     * Tests to make sure no errors are returned when <code>Set</code> of
      * ConstraintViolation</code> is empty.
      */
     @Test
