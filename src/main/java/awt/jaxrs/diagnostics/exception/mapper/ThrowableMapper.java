@@ -4,6 +4,7 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
 import java.lang.invoke.MethodHandles;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.*;
 
@@ -18,6 +19,11 @@ public class ThrowableMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(final Throwable throwable) {
+	if (throwable instanceof WebApplicationException) {
+	    final WebApplicationException exception = (WebApplicationException) throwable;
+	    return exception.getResponse();
+	}
+
 	LOGGER.error("Handled by the generic exception mapper.", throwable);
 
 	final String logId = MDC.get(MDCFilter.REQUEST_ID);
