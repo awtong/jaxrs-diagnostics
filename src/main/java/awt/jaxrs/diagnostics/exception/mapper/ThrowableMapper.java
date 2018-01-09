@@ -10,8 +10,9 @@ import javax.ws.rs.ext.*;
 
 import org.slf4j.*;
 
+import com.typesafe.config.*;
+
 import awt.jaxrs.diagnostics.error.ErrorMessages;
-import awt.jaxrs.diagnostics.mdc.MDCFilter;
 
 @Provider
 public class ThrowableMapper implements ExceptionMapper<Throwable> {
@@ -19,17 +20,30 @@ public class ThrowableMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(final Throwable throwable) {
+
 	if (throwable instanceof WebApplicationException) {
 	    final WebApplicationException exception = (WebApplicationException) throwable;
-	    return exception.getResponse();
+	    final Response response = exception.getResponse();
+	    if (response.hasEntity()) {
+		return response;
+	    }
+
+	    final ErrorMessages errors = this.getErrorMessages(throwable);
+	    return Response.status(response.getStatus()).entity(errors).build();
 	}
 
 	LOGGER.error("Handled by the generic exception mapper.", throwable);
 
-	final String logId = MDC.get(MDCFilter.REQUEST_ID);
+	final ErrorMessages errors = this.getErrorMessages(throwable);
+	return Response.status(INTERNAL_SERVER_ERROR).entity(errors).build();
+    }
+
+    private ErrorMessages getErrorMessages(final Throwable throwable) {
+	final Config config = ConfigFactory.load();
+
+	final String logId = MDC.get(config.getString("logging.log-id"));
 	final ErrorMessages errors = LOGGER.isInfoEnabled() ? ErrorMessages.fromException(logId, throwable)
 		: new ErrorMessages(logId);
-
-	return Response.status(INTERNAL_SERVER_ERROR).entity(errors).build();
+	return errors;
     }
 }

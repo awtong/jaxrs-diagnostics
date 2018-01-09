@@ -11,8 +11,9 @@ import javax.ws.rs.core.Response;
 import org.junit.*;
 import org.slf4j.*;
 
+import com.typesafe.config.*;
+
 import awt.jaxrs.diagnostics.error.*;
-import awt.jaxrs.diagnostics.mdc.MDCFilter;
 import awt.jaxrs.diagnostics.rules.MDCRule;
 
 public class ThrowableMapperTest {
@@ -23,13 +24,15 @@ public class ThrowableMapperTest {
 
     @Test
     public void test() {
+	final Config config = ConfigFactory.load();
+
 	final ThrowableMapper mapper = new ThrowableMapper();
 	final Response response = mapper.toResponse(new Throwable());
 	assertThat(response.getStatus(), is(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()));
 
 	final ErrorMessages errorMessages = (ErrorMessages) response.getEntity();
 	assertThat(errorMessages, is(notNullValue()));
-	assertThat(errorMessages.getLogId(), is(MDC.get(MDCFilter.REQUEST_ID)));
+	assertThat(errorMessages.getLogId(), is(MDC.get(config.getString("logging.log-id"))));
 
 	final Collection<ErrorMessage> errors = errorMessages.getErrors();
 	assertThat(errors.size(), is(LOGGER.isInfoEnabled() ? 1 : 0));

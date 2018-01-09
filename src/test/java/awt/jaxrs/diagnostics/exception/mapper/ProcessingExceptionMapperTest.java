@@ -13,8 +13,9 @@ import javax.ws.rs.core.*;
 import org.junit.*;
 import org.slf4j.*;
 
+import com.typesafe.config.*;
+
 import awt.jaxrs.diagnostics.error.*;
-import awt.jaxrs.diagnostics.mdc.MDCFilter;
 import awt.jaxrs.diagnostics.rules.MDCRule;
 
 public class ProcessingExceptionMapperTest {
@@ -25,6 +26,8 @@ public class ProcessingExceptionMapperTest {
 
     @Test
     public void testConnectException() {
+	final Config config = ConfigFactory.load();
+
 	final ProcessingException exception = new ProcessingException(new ConnectException());
 	final ProcessingExceptionMapper mapper = new ProcessingExceptionMapper();
 	final Response response = mapper.toResponse(exception);
@@ -36,7 +39,7 @@ public class ProcessingExceptionMapperTest {
 
 	final ErrorMessages errorMessages = (ErrorMessages) response.getEntity();
 	assertThat(errorMessages, is(notNullValue()));
-	assertThat(errorMessages.getLogId(), is(MDC.get(MDCFilter.REQUEST_ID)));
+	assertThat(errorMessages.getLogId(), is(MDC.get(config.getString("logging.log-id"))));
 
 	final Collection<ErrorMessage> errors = errorMessages.getErrors();
 	assertThat(errors.size(), is(LOGGER.isInfoEnabled() ? 1 : 0));
@@ -46,6 +49,8 @@ public class ProcessingExceptionMapperTest {
 
     @Test
     public void testSocketTimeoutException() {
+	final Config config = ConfigFactory.load();
+
 	final ProcessingException exception = new ProcessingException(new SocketTimeoutException());
 	final ProcessingExceptionMapper mapper = new ProcessingExceptionMapper();
 	final Response response = mapper.toResponse(exception);
@@ -56,7 +61,7 @@ public class ProcessingExceptionMapperTest {
 
 	final ErrorMessages errorMessages = (ErrorMessages) response.getEntity();
 	assertThat(errorMessages, is(notNullValue()));
-	assertThat(errorMessages.getLogId(), is(MDC.get(MDCFilter.REQUEST_ID)));
+	assertThat(errorMessages.getLogId(), is(MDC.get(config.getString("logging.log-id"))));
 
 	final Collection<ErrorMessage> errors = errorMessages.getErrors();
 	assertThat(errors.size(), is(LOGGER.isInfoEnabled() ? 1 : 0));
@@ -66,6 +71,8 @@ public class ProcessingExceptionMapperTest {
 
     @Test
     public void testException() {
+	final Config config = ConfigFactory.load();
+
 	final ProcessingException exception = new ProcessingException(new Exception("Some Message"));
 	final ProcessingExceptionMapper mapper = new ProcessingExceptionMapper();
 	final Response response = mapper.toResponse(exception);
@@ -76,7 +83,7 @@ public class ProcessingExceptionMapperTest {
 
 	final ErrorMessages errorMessages = (ErrorMessages) response.getEntity();
 	assertThat(errorMessages, is(notNullValue()));
-	assertThat(errorMessages.getLogId(), is(MDC.get(MDCFilter.REQUEST_ID)));
+	assertThat(errorMessages.getLogId(), is(MDC.get(config.getString("logging.log-id"))));
 
 	final Collection<ErrorMessage> errors = errorMessages.getErrors();
 	assertThat(errors.size(), is(LOGGER.isInfoEnabled() ? 1 : 0));

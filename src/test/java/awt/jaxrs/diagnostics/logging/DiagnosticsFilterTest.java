@@ -55,7 +55,7 @@ public class DiagnosticsFilterTest {
 	when(request.getMethod()).thenReturn(HttpMethod.GET);
 
 	final MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
-	headers.putSingle("Foo", "Bar");
+	headers.putSingle("Password", "Bar");
 	headers.putSingle("Hello", "Goodbye");
 	headers.addAll("Multi", "1", "2", "3");
 	when(request.getHeaders()).thenReturn(headers);

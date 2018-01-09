@@ -12,8 +12,9 @@ import javax.ws.rs.ext.*;
 
 import org.slf4j.*;
 
+import com.typesafe.config.*;
+
 import awt.jaxrs.diagnostics.error.ErrorMessages;
-import awt.jaxrs.diagnostics.mdc.MDCFilter;
 
 @Provider
 public class ProcessingExceptionMapper implements ExceptionMapper<ProcessingException> {
@@ -24,7 +25,8 @@ public class ProcessingExceptionMapper implements ExceptionMapper<ProcessingExce
     public Response toResponse(final ProcessingException exception) {
 	LOGGER.error("Error calling the JAX-RS endpoint.", exception);
 
-	final String logId = MDC.get(MDCFilter.REQUEST_ID);
+	final Config config = ConfigFactory.load();
+	final String logId = MDC.get(config.getString("logging.log-id"));
 	final ErrorMessages errors = LOGGER.isInfoEnabled() ? ErrorMessages.fromException(logId, exception)
 		: new ErrorMessages(logId);
 

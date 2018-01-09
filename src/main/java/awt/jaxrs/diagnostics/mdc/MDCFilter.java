@@ -8,22 +8,22 @@ import javax.ws.rs.ext.Provider;
 
 import org.slf4j.MDC;
 
+import com.typesafe.config.*;
+
 @Provider
 @Priority(1)
 public class MDCFilter implements ContainerRequestFilter, ContainerResponseFilter {
-    // private static final Logger LOGGER =
-    // LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-    public static final String REQUEST_ID = "log-id";
-
     @Override
     public void filter(final ContainerRequestContext request) {
 	final UUID uuid = UUID.randomUUID();
-	MDC.put(REQUEST_ID, uuid.toString());
+
+	final Config config = ConfigFactory.load();
+	MDC.put(config.getString("logging.log-id"), uuid.toString());
     }
 
     @Override
     public void filter(final ContainerRequestContext request, final ContainerResponseContext response) {
-	MDC.remove(REQUEST_ID);
+	final Config config = ConfigFactory.load();
+	MDC.remove(config.getString("logging.log-id"));
     }
 }

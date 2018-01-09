@@ -12,9 +12,9 @@ import javax.ws.rs.ext.*;
 import org.slf4j.*;
 
 import com.google.common.collect.Iterables;
+import com.typesafe.config.*;
 
 import awt.jaxrs.diagnostics.error.*;
-import awt.jaxrs.diagnostics.mdc.MDCFilter;
 
 @Provider
 public class ConstraintViolationExceptionMapper implements ExceptionMapper<ConstraintViolationException> {
@@ -22,7 +22,9 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 
     @Override
     public Response toResponse(final ConstraintViolationException exception) {
-	final ErrorMessages errors = new ErrorMessages(MDC.get(MDCFilter.REQUEST_ID));
+	final Config config = ConfigFactory.load();
+
+	final ErrorMessages errors = new ErrorMessages(MDC.get(config.getString("logging.log-id")));
 	final Set<ConstraintViolation<?>> violations = exception.getConstraintViolations();
 	if ((violations != null) && !violations.isEmpty()) {
 	    violations.forEach(violation -> {
